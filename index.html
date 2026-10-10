@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算机互连方法与网络拓扑 · 动画演示</title>
+<style>
+  :root{
+    --ink:#2d3142;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    background-color:#fffdf6;
+    background-image:
+      radial-gradient(circle at 12% 6%,  rgba(255,214,102,.35) 0%, transparent 38%),
+      radial-gradient(circle at 88% 92%, rgba(77,171,247,.22) 0%, transparent 38%),
+      radial-gradient(circle at 85% 8%,  rgba(155,126,222,.18) 0%, transparent 32%),
+      radial-gradient(#eae5d8 1.6px, transparent 1.6px);
+    background-size:100% 100%, 100% 100%, 100% 100%, 26px 26px;
+    color:var(--ink);
+    font-family:"Comic Sans MS","Chalkboard SE","华文楷体","KaiTi","楷体","Microsoft YaHei",sans-serif;
+    padding:26px 16px 70px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+
+  header{text-align:center;margin-bottom:24px;}
+  header h1{
+    margin:0 0 10px;
+    font-size:clamp(21px,3.6vw,32px);
+    letter-spacing:1.5px;
+    color:var(--ink);
+    font-weight:800;
+    text-shadow:3px 3px 0 #ffe28a, 6px 6px 0 rgba(45,49,66,.10);
+  }
+  header p{
+    margin:0;
+    font-size:14.5px;
+    color:#7c8398;
+    letter-spacing:.5px;
+  }
+
+  .card{
+    background:var(--card);
+    border:3px solid var(--ink);
+    border-radius:24px;
+    padding:20px;
+    margin-bottom:28px;
+    box-shadow:7px 7px 0 rgba(45,49,66,.13);
+    position:relative;
+  }
+
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .tab{
+    cursor:pointer;
+    border:2.5px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    padding:9px 19px;
+    border-radius:999px;
+    font-size:14.5px;
+    font-family:inherit;
+    font-weight:700;
+    letter-spacing:.5px;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+    box-shadow:3px 3px 0 rgba(45,49,66,.16);
+    user-select:none;
+  }
+  .tab:hover{
+    transform:translate(-1.5px,-1.5px);
+    box-shadow:5px 5px 0 rgba(45,49,66,.22);
+  }
+  .tab:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(45,49,66,.2);}
+  .tab.active{
+    background:var(--c,#4dabf7);
+    color:#fff;
+    box-shadow:2px 2px 0 var(--ink);
+    transform:translate(1px,1px);
+  }
+
+  canvas{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:16px;
+    border:3px solid var(--ink);
+    background:#fffef9;
+    box-shadow:5px 5px 0 rgba(45,49,66,.10);
+  }
+
+  .hint{
+    text-align:center;
+    font-size:13.5px;
+    color:#8a93a8;
+    margin-top:12px;
+    letter-spacing:.4px;
+    min-height:20px;
+    font-weight:700;
+    transition:color .2s;
+  }
+  .hint.picking{ color:#ff6b6b; }
+
+  .desc{
+    margin-top:16px;
+    padding:14px 18px;
+    border-radius:14px;
+    border:2.5px dashed #cfd6e4;
+    background:#fbfcff;
+    font-size:14.5px;
+    line-height:1.9;
+    color:#414a5e;
+    transition:border-color .25s, background .25s;
+  }
+  .desc b{color:#1f2a44;}
+  .desc .ok{color:#12a150;font-weight:700;}
+  .desc .warn{color:#e8590c;font-weight:700;}
+
+  h2{
+    text-align:center;
+    font-size:20px;
+    margin:0 0 4px;
+    color:var(--ink);
+    letter-spacing:1px;
+  }
+  h2 .hl{
+    background:linear-gradient(transparent 58%, #ffe28a 58%);
+    padding:0 3px;
+  }
+  .sub-title{
+    text-align:center;
+    color:#98a0b3;
+    font-size:13.5px;
+    margin:0 0 16px;
+    letter-spacing:.4px;
+  }
+
+  /* ---------- 工具栏 ---------- */
+  .lan-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .tool{
+    cursor:pointer;
+    border:2.5px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    padding:9px 18px;
+    border-radius:999px;
+    font-size:14px;
+    font-family:inherit;
+    font-weight:700;
+    letter-spacing:.4px;
+    box-shadow:3px 3px 0 rgba(45,49,66,.16);
+    transition:transform .16s, box-shadow .16s, background .16s;
+    user-select:none;
+  }
+  .tool:hover{transform:translate(-1.5px,-1.5px);box-shadow:5px 5px 0 rgba(45,49,66,.22);}
+  .tool:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(45,49,66,.2);}
+  .tool.active{background:#ffe066;box-shadow:2px 2px 0 var(--ink);transform:translate(1px,1px);}
+  .tool.reset{background:#f1f3f5;}
+
+  /* ---------- 实验状态栏 ---------- */
+  .lan-status{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:14px 22px;
+    justify-content:center;
+    margin-top:16px;
+    padding:12px 18px;
+    border-radius:14px;
+    border:2.5px solid #e3e8f0;
+    background:#fbfcff;
+    font-size:14.5px;
+    font-weight:700;
+    color:#414a5e;
+  }
+  .stat-item{display:flex;align-items:center;gap:8px;}
+  .stat-item b{font-size:17px;color:#1f2a44;}
+  .stat-dot{
+    width:13px;height:13px;border-radius:50%;
+    background:#d5dae4;border:2px solid var(--ink);
+    transition:background .25s, box-shadow .25s;
+  }
+  .stat-dot.on{background:#51cf66;box-shadow:0 0 0 4px rgba(81,207,102,.25);}
+  .stat-msg{color:#98a0b3;font-weight:700;transition:color .25s;}
+  .stat-msg.ok{color:#12a150;font-size:15px;}
+  .stat-msg.warn{color:#ff6b6b;}
+
+  /* ---------- n台机器公式条 ---------- */
+  .n-info{
+    text-align:center;
+    margin-top:14px;
+    font-size:16px;
+    font-weight:700;
+    color:#1f2a44;
+    letter-spacing:.5px;
+  }
+  .n-info b{
+    display:inline-block;
+    background:#ffe066;
+    border:2.5px solid var(--ink);
+    border-radius:10px;
+    padding:2px 12px;
+    margin:0 4px;
+    font-size:19px;
+    box-shadow:2px 2px 0 rgba(45,49,66,.15);
+  }
+
+  /* ---------- MAC 表格 ---------- */
+  .mac-btn-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin:16px 0;
+  }
+  .mac-table{
+    width:100%;
+    max-width:640px;
+    margin:0 auto;
+    border-collapse:separate;
+    border-spacing:0;
+    border:3px solid var(--ink);
+    border-radius:16px;
+    overflow:hidden;
+    font-size:15px;
+    box-shadow:5px 5px 0 rgba(45,49,66,.10);
+    background:#fff;
+  }
+  .mac-table th{
+    background:#eaf6ff;
+    padding:11px 8px;
+    border-bottom:2.5px solid var(--ink);
+    font-size:15px;
+    color:#1f2a44;
+    letter-spacing:.5px;
+  }
+  .mac-table td{
+    padding:11px 8px;
+    text-align:center;
+    border-bottom:1.5px dashed #dfe5ee;
+    font-family:"Courier New",monospace;
+    font-weight:700;
+    letter-spacing:.5px;
+    transition:background .25s, color .25s;
+  }
+  .mac-table td:first-child{font-family:inherit;font-size:15px;}
+  .mac-table tbody tr:last-child td{border-bottom:none;}
+  .mac-table tr.hl td{background:#fff3bf;color:#b3541e;}
+  .mac-table tr.hl td:last-child{background:#ffe066;color:#7a4a00;font-size:17px;}
+
+  .n-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🌐 计算机互连方法与网络拓扑</h1>
+    <p>点一点、拖一拖，看数据包在网络里旅行 ✨</p>
+  </header>
+
+  <!-- ============================================================
+       板块 0：n 台机器互连方法
+       ============================================================ -->
+  <section class="card">
+    <h2>📐 n 台机器怎么<span class="hl">互连</span>？</h2>
+    <p class="sub-title">每两台机器之间都拉一根网线，机器越多，线越多</p>
+
+    <div class="n-tabs" id="nTabs">
+      <button class="tab" data-n="2" style="--c:#4dabf7">2 台</button>
+      <button class="tab" data-n="3" style="--c:#ff922b">3 台</button>
+      <button class="tab" data-n="4" style="--c:#9b7ede">4 台</button>
+      <button class="tab" data-n="5" style="--c:#51cf66">5 台</button>
+      <button class="tab" data-n="6" style="--c:#ff8fab">6 台</button>
+    </div>
+
+    <canvas id="nCanvas"></canvas>
+
+    <div class="n-info" id="nInfo"></div>
+
+    <div class="desc">
+      <b>💡 规律：</b>n 台机器两两互连，网线数量 = n × (n − 1) ÷ 2。<br>
+      机器少的时候还凑合，一旦超过 5 台，线就多得吓人——所以真实网络里我们用<b>交换机</b>来解决问题（下面几块内容就会讲到）。
+    </div>
+  </section>
+
+  <!-- ============================================================
+       板块 1：拓扑演示
+       ============================================================ -->
+  <section class="card">
+    <div class="tabs" id="topoTabs">
+      <button class="tab" data-topo="linear" style="--c:#ff922b">🍭 线性拓扑</button>
+      <button class="tab" data-topo="star"   style="--c:#4dabf7">⭐ 星状拓扑</button>
+      <button class="tab" data-topo="ring"   style="--c:#9b7ede">💫 环状拓扑</button>
+      <button class="tab" data-topo="mesh"   style="--c:#51cf66">🕸️ 网状拓扑</button>
+      <button class="tab" data-topo="tree"   style="--c:#ff8fab">🌳 树状拓扑</button>
+    </div>
+
+    <canvas id="topoCanvas"></canvas>
+
+    <div class="hint" id="topoHint"></div>
+    <div class="desc" id="topoDesc"></div>
+  </section>
+
+  <!-- ============================================================
+       板块 2：交换机 vs 集线器
+       ============================================================ -->
+  <section class="card">
+    <h2>中心设备 <span class="hl">交换机</span> 的作用</h2>
+    <p class="sub-title">同样一台中心设备，为什么交换机会比集线器快得多？</p>
+
+    <div class="tabs" id="modeTabs">
+      <button class="tab" data-mode="hub"    style="--c:#ff6b6b">📢 集线器：广播式</button>
+      <button class="tab" data-mode="switch" style="--c:#00c2a8">🎯 交换机：定向转发</button>
+    </div>
+
+    <canvas id="switchCanvas"></canvas>
+    <div class="desc" id="switchDesc"></div>
+  </section>
+
+  <!-- ============================================================
+       板块 3：MAC 地址表
+       ============================================================ -->
+  <section class="card">
+    <h2>📋 交换机怎么知道数据发给谁？<span class="hl">MAC 地址表</span></h2>
+    <p class="sub-title">每块网卡都有一个全球唯一的 MAC 地址，交换机靠它记住「哪台电脑接在哪个端口」</p>
+
+    <canvas id="macCanvas"></canvas>
+
+    <div class="mac-btn-row">
+      <button class="tool" id="macAtoC">▶ 让 A 给 C 发消息</button>
+      <button class="tool" id="macBtoD">▶ 让 B 给 D 发消息</button>
+      <button class="tool reset" id="macClear">↺ 清空</button>
+    </div>
+
+    <table class="mac-table" id="macTable">
+      <thead>
+        <tr><th>计算机</th><th>MAC 地址</th><th>交换机端口</th></tr>
+      </thead>
+      <tbody>
+        <tr id="macRow-A"><td>A</td><td>aa-aa-aa-aa-aa-aa</td><td>1</td></tr>
+        <tr id="macRow-B"><td>B</td><td>bb-bb-bb-bb-bb-bb</td><td>2</td></tr>
+        <tr id="macRow-C"><td>C</td><td>cc-cc-cc-cc-cc-cc</td><td>3</td></tr>
+        <tr id="macRow-D"><td>D</td><td>dd-dd-dd-dd-dd-dd</td><td>4</td></tr>
+      </tbody>
+    </table>
+
+    <div class="desc" id="macDesc">
+      <b>💡 交换机的工作过程：</b>当 A 给 C 发消息时，交换机会查看数据里的<b>目标 MAC 地址</b>「cc-cc-cc-cc-cc-cc」，
+      然后查自己的 MAC 地址表，发现这个地址对应的是<b>端口 3</b>，于是只从端口 3 把数据发出去——
+      这就是「定向转发」，其他电脑完全收不到。<br>
+      <span class="ok">🔍 试一试：</span>点上面的按钮，看看数据包里写的 MAC 地址，和表格里对上的那一行会亮起来。
+    </div>
+  </section>
+
+  <!-- ============================================================
+       板块 4：动手实验
+       ============================================================ -->
+  <section class="card">
+    <h2>🧪 动手实验：<span class="hl">组建小型局域网</span></h2>
+    <p class="sub-title">拖动设备摆好位置，用「连接网线」自由连线，再切到「发送数据」看看数据怎么走</p>
+
+    <div class="lan-toolbar">
+      <button class="tool active" data-mode="move">🖐 拖动设备</button>
+      <button class="tool" data-mode="link">🔗 连接网线</button>
+      <button class="tool" data-mode="erase">✂️ 删除网线</button>
+      <button class="tool" data-mode="send">📨 发送数据</button>
+      <button class="tool reset" id="lanReset">↺ 重置实验</button>
+    </div>
+
+    <canvas id="lanCanvas"></canvas>
+
+    <div class="hint" id="lanHint"></div>
+
+    <div class="lan-status">
+      <div class="stat-item"><span class="stat-dot" id="dotPC"></span>已连网电脑 <b id="connPC">0</b>/4</div>
+      <div class="stat-item"><span class="stat-dot" id="dotSW"></span>交换机端口 <b id="usedPort">0</b>/5</div>
+      <div class="stat-msg" id="statMsg"></div>
+    </div>
+
+    <div class="desc" id="lanDesc">
+      <b>🎯 实验目标：</b>用网线把 4 台电脑全部接入交换机，组建一个小型局域网。也可以试试电脑之间直接连线，看看数据会不会走别的路。<br>
+      <span class="ok">💡 观察指示灯：</span>电脑网卡旁的小灯、交换机端口下方的小灯，<b>连上网线就会变绿</b>；网线拔掉，灯就熄灭——这是网络管理员排查故障的第一招。
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ===================== 基础工具 ===================== */
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const INK = '#2d3142';
+const PALETTE = ['#4dabf7','#ff922b','#9b7ede','#51cf66','#ff8fab','#00c2a8','#ffc93c','#ff6b6b'];
+
+function setupCanvas(canvas, w, h){
+  canvas.width  = w * DPR;
+  canvas.height = h * DPR;
+  canvas.style.aspectRatio = w + ' / ' + h;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return ctx;
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  r = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
+}
+
+function tint(hex, a){
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+
+function makeDotPattern(w, h, spacing, color){
+  const off = document.createElement('canvas');
+  off.width  = w * DPR;
+  off.height = h * DPR;
+  const c = off.getContext('2d');
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  c.fillStyle = color;
+  for (let x = spacing/2; x < w; x += spacing){
+    for (let y = spacing/2; y < h; y += spacing){
+      c.beginPath(); c.arc(x, y, 1.7, 0, Math.PI*2); c.fill();
+    }
+  }
+  return off;
+}
+
+function polyLen(pts){
+  let t = 0;
+  for (let i = 0; i < pts.length - 1; i++){
+    t += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+  }
+  return t;
+}
+
+function pointAt(pts, frac){
+  const segs = [];
+  let total = 0;
+  for (let i = 0; i < pts.length - 1; i++){
+    const l = Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+    segs.push(l); total += l;
+  }
+  if (total === 0) return {x: pts[0].x, y: pts[0].y};
+  let d = Math.max(0, Math.min(1, frac)) * total;
+  for (let i = 0; i < segs.length; i++){
+    if (d <= segs[i] || i === segs.length - 1){
+      const t = segs[i] ? Math.min(1, d / segs[i]) : 1;
+      return {
+        x: pts[i].x + (pts[i+1].x - pts[i].x) * t,
+        y: pts[i].y + (pts[i+1].y - pts[i].y) * t
+      };
+    }
+    d -= segs[i];
+  }
+  return pts[pts.length - 1];
+}
+
+function distToSeg(px,py,x1,y1,x2,y2){
+  const dx = x2-x1, dy = y2-y1;
+  const l2 = dx*dx + dy*dy;
+  if (l2 === 0) return Math.hypot(px-x1, py-y1);
+  let t = ((px-x1)*dx + (py-y1)*dy) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x1 + t*dx), py - (y1 + t*dy));
+}
+
+/* ===================== 绘图：简笔画电脑 ===================== */
+function drawPC(ctx, x, y, label, baseColor, highlight){
+  ctx.save();
+  ctx.translate(x, y);
+  const strokeColor = highlight || INK;
+
+  if (highlight){ ctx.shadowColor = highlight; ctx.shadowBlur = 20; }
+
+  roundRect(ctx, -30, -38, 60, 46, 10);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 3.2;
+  ctx.strokeStyle = strokeColor;
+  ctx.stroke();
+
+  roundRect(ctx, -22, -31, 44, 30, 6);
+  ctx.fillStyle = tint(baseColor, 0.18);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = tint(baseColor, 0.75);
+  ctx.stroke();
+
+  ctx.fillStyle = INK;
+  ctx.beginPath(); ctx.arc(-8, -21, 2.7, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 8, -21, 2.7, 0, Math.PI*2); ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(0, -17, 7, 0.18*Math.PI, 0.82*Math.PI);
+  ctx.lineWidth = 2.3; ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.stroke();
+
+  ctx.fillStyle = tint(baseColor, 0.35);
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.rect(-4, 8, 8, 8); ctx.fill(); ctx.stroke();
+  roundRect(ctx, -16, 16, 32, 6, 3);
+  ctx.fill(); ctx.stroke();
+
+  ctx.font = 'bold 13px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const tw = ctx.measureText(label).width;
+  roundRect(ctx, -tw/2 - 9, 30, tw + 18, 22, 11);
+  ctx.fillStyle = highlight ? highlight : '#f4f6fb';
+  ctx.fill();
+  ctx.lineWidth = 2.4;
+  ctx.strokeStyle = highlight ? INK : '#c8cfdd';
+  ctx.stroke();
+  ctx.fillStyle = highlight ? '#fff' : INK;
+  ctx.fillText(label, 0, 41.5);
+
+  ctx.restore();
+}
+
+/* ===================== 绘图：数据包 ===================== */
+function drawPacket(ctx, x, y, color, phase){
+  const r = 8.5 + Math.sin(phase * 10) * 1.3;
+
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 18;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(x - r*0.32, y - r*0.32, r*0.36, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fill();
+}
+
+let clock = 0;
+
+/* ============================================================
+   板块 0：n 台机器互连
+   ============================================================ */
+const NW = 900, NH = 420;
+const nCanvas = document.getElementById('nCanvas');
+const nCtx = setupCanvas(nCanvas, NW, NH);
+const nDots = makeDotPattern(NW, NH, 28, '#eceadf');
+
+let nSel = 4;
+let nProg = 0;
+
+function nLinkCount(n){ return n * (n - 1) / 2; }
+
+function nPosis(n){
+  const cx = 450, cy = 210, rx = 300, ry = 132;
+  const arr = [];
+  for (let i = 0; i < n; i++){
+    const a = -Math.PI/2 + i * 2 * Math.PI / n;
+    arr.push({ x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry });
+  }
+  return arr;
+}
+
+function setN(n){
+  nSel = n;
+  nProg = 0;
+  const total = nLinkCount(n);
+  document.getElementById('nInfo').innerHTML =
+    n + ' 台机器两两互连 → ' + n + '×' + (n-1) + '÷2 = <b>' + total + '</b> 根网线';
+  document.querySelectorAll('#nTabs .tab').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.dataset.n, 10) === n);
+  });
+}
+
+function updateN(dt){
+  const total = nLinkCount(nSel);
+  if (nProg < total) nProg += dt * 3.2;
+  if (nProg > total) nProg = total;
+}
+
+function drawN(){
+  const ctx = nCtx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, NW, NH);
+  ctx.drawImage(nDots, 0, 0, NW, NH);
+
+  const n = nSel;
+  const pts = nPosis(n);
+  const links = [];
+  for (let i = 0; i < n; i++){
+    for (let j = i + 1; j < n; j++) links.push([i, j]);
+  }
+
+  ctx.lineCap = 'round';
+  for (let k = 0; k < links.length; k++){
+    const p = Math.max(0, Math.min(1, nProg - k));
+    if (p <= 0) continue;
+    const a = pts[links[k][0]], b = pts[links[k][1]];
+    const ex = a.x + (b.x - a.x) * p, ey = a.y + (b.y - a.y) * p;
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = '#b7e4c7';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = '#38a169';
+    ctx.lineWidth = 3.6;
+    ctx.stroke();
+  }
+
+  pts.forEach(function(p, i){
+    drawPC(ctx, p.x, p.y, '电脑' + (i + 1), PALETTE[i % PALETTE.length], null);
+  });
+}
+
+/* ============================================================
+   板块 1：拓扑数据
+   ============================================================ */
+const TOPOS = {
+  linear: {
+    color: '#ff922b',
+    desc: `<b>🍭 线性拓扑</b>：所有计算机依次「串」在同一条线路上，像一串糖葫芦。<br>
+           <span class="ok">✅ 优点：</span>需要的线缆最少，结构最简单，成本低。<br>
+           <span class="warn">⚠️ 缺点：</span>数据要一站一站往下传，中间某台电脑或某段线路一断，后面的电脑就全部掉线。`,
+    nodes: [
+      {x:110, y:265, label:'电脑1', type:'pc'},
+      {x:250, y:265, label:'电脑2', type:'pc'},
+      {x:390, y:265, label:'电脑3', type:'pc'},
+      {x:530, y:265, label:'电脑4', type:'pc'},
+      {x:670, y:265, label:'电脑5', type:'pc'},
+      {x:810, y:265, label:'电脑6', type:'pc'}
+    ],
+    edges: [[0,1],[1,2],[2,3],[3,4],[4,5]]
+  },
+
+  /* 星状：中心也是一台电脑（不使用交换机） */
+  star: {
+    color: '#4dabf7',
+    desc: `<b>⭐ 星状拓扑</b>：一台<b>中心电脑</b>连接其他所有电脑，其余电脑之间通信都要经过中心电脑转发。<br>
+           <span class="ok">✅ 优点：</span>某台普通电脑或某条网线坏了，不影响其他电脑；管理、排查故障都很方便。<br>
+           <span class="warn">⚠️ 缺点：</span>中心电脑一旦关机或故障，整个网络就瘫痪了；所有数据都要挤到中心，压力很大。`,
+    nodes: [
+      {x:450, y:260, label:'中心电脑', type:'pc'},
+      {x:450, y: 80, label:'电脑1', type:'pc'},
+      {x:690, y:165, label:'电脑2', type:'pc'},
+      {x:690, y:355, label:'电脑3', type:'pc'},
+      {x:450, y:440, label:'电脑4', type:'pc'},
+      {x:210, y:355, label:'电脑5', type:'pc'},
+      {x:210, y:165, label:'电脑6', type:'pc'}
+    ],
+    edges: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6]]
+  },
+
+  ring: {
+    color: '#9b7ede',
+    desc: `<b>💫 环状拓扑</b>：计算机首尾相连围成一个圈，数据沿着环一站一站地传下去。<br>
+           <span class="ok">✅ 优点：</span>线路利用率高，网络结构规整。<br>
+           <span class="warn">⚠️ 缺点：</span>环上任意一处断开，整个网络就无法通信；数据绕圈传递，效率较低。`,
+    nodes: [
+      {x:450, y: 90, label:'电脑1', type:'pc'},
+      {x:655, y:141, label:'电脑2', type:'pc'},
+      {x:740, y:265, label:'电脑3', type:'pc'},
+      {x:655, y:389, label:'电脑4', type:'pc'},
+      {x:450, y:440, label:'电脑5', type:'pc'},
+      {x:245, y:389, label:'电脑6', type:'pc'},
+      {x:160, y:265, label:'电脑7', type:'pc'},
+      {x:245, y:141, label:'电脑8', type:'pc'}
+    ],
+    edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0]]
+  },
+
+  mesh: {
+    color: '#51cf66',
+    desc: `<b>🕸️ 网状拓扑</b>：每一台计算机都和其他计算机<b>直接相连</b>，任意两台之间都有专线。<br>
+           <span class="ok">✅ 优点：</span>可靠性最高，一条线路断了还能走别的路，互联网的骨干网就采用网状结构。<br>
+           <span class="warn">⚠️ 缺点：</span>连接线数量随电脑数量急剧增长，布线复杂、成本很高。`,
+    nodes: [
+      {x:450, y: 90, label:'电脑1', type:'pc'},
+      {x:726, y:211, label:'电脑2', type:'pc'},
+      {x:620, y:407, label:'电脑3', type:'pc'},
+      {x:280, y:407, label:'电脑4', type:'pc'},
+      {x:174, y:211, label:'电脑5', type:'pc'}
+    ],
+    edges: [[0,1],[0,2],[0,3],[0,4],[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
+  },
+
+  /* 树状：完整二叉树，全部由电脑组成（不使用交换机） */
+  tree: {
+    color: '#ff8fab',
+    desc: `<b>🌳 树状拓扑</b>：电脑像树枝一样<b>分层连接</b>，最上面的电脑连接两台下级电脑，下级再各自连接更下级的电脑。<br>
+           <span class="ok">✅ 优点：</span>结构清晰、容易扩展——想加电脑，接在最末端就行；也方便按楼层、按部门分层管理。<br>
+           <span class="warn">⚠️ 缺点：</span>上层电脑一旦出问题，它下面整枝的网络都会受影响；数据要层层转发，路径比较长。`,
+    nodes: [
+      {x:450, y: 70, label:'电脑1', type:'pc'},
+      {x:250, y:195, label:'电脑2', type:'pc'},
+      {x:650, y:195, label:'电脑3', type:'pc'},
+      {x:140, y:385, label:'电脑4', type:'pc'},
+      {x:360, y:385, label:'电脑5', type:'pc'},
+      {x:540, y:385, label:'电脑6', type:'pc'},
+      {x:760, y:385, label:'电脑7', type:'pc'}
+    ],
+    edges: [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]]
+  }
+};
+
+/* ============================================================
+   拓扑画布
+   ============================================================ */
+const TW = 900, TH = 520;
+const topoCanvas = document.getElementById('topoCanvas');
+const tctx = setupCanvas(topoCanvas, TW, TH);
+const topoDots = makeDotPattern(TW, TH, 28, '#eceadf');
+
+const SPEED = 250;
+
+const state = {
+  key: 'linear',
+  nodes: [],
+  edges: [],
+  adj: [],
+  path: [],
+  pathLen: 0,
+  dist: 0,
+  src: -1,
+  dst: -1,
+  phase: 'idle',
+  timer: 0
+};
+
+let pendingSrc = -1;
+let lastHintPhase = '';
+
+function findPath(adj, s, d){
+  if (s === d) return [s];
+  const n = adj.length;
+  const prev = new Array(n).fill(-1);
+  const seen = new Array(n).fill(false);
+  const q = [s];
+  seen[s] = true;
+
+  while (q.length){
+    const u = q.shift();
+    for (const v of adj[u]){
+      if (!seen[v]){
+        seen[v] = true;
+        prev[v] = u;
+        if (v === d){
+          const p = [];
+          let cur = d;
+          while (cur !== -1){ p.unshift(cur); cur = prev[cur]; }
+          return p;
+        }
+        q.push(v);
+      }
+    }
+  }
+  return null;
+}
+
+function setTrip(s, d){
+  const p = findPath(state.adj, s, d);
+  if (!p || p.length < 2) return false;
+  state.path = p;
+  state.src = s;
+  state.dst = d;
+  state.pathLen = polyLen(p.map(i => state.nodes[i]));
+  state.dist = 0;
+  state.phase = 'moving';
+  state.timer = 0;
+  return true;
+}
+
+function updateTopoHint(){
+  const el = document.getElementById('topoHint');
+  if (state.phase === 'moving'){
+    const s = state.nodes[state.src], d = state.nodes[state.dst];
+    el.textContent = '📨 数据正在从【' + s.label + '】飞向【' + d.label + '】…';
+    el.classList.remove('picking');
+  } else if (state.phase === 'arrived'){
+    const d = state.nodes[state.dst];
+    el.textContent = '🎉 数据成功送达【' + d.label + '】！再点两台电脑继续试试～';
+    el.classList.remove('picking');
+  } else if (pendingSrc === -1){
+    el.textContent = '👆 依次点击两台计算机，看看数据怎么从一台传到另一台！';
+    el.classList.remove('picking');
+  } else {
+    const n = state.nodes[pendingSrc];
+    el.textContent = '✅ 已选择【' + (n ? n.label : '') + '】作为发送方，再点一台计算机作为接收方吧～';
+    el.classList.add('picking');
+  }
+}
+
+function loadTopo(key){
+  state.key = key;
+  const def = TOPOS[key];
+  state.nodes = def.nodes.map(n => Object.assign({}, n));
+  state.edges = def.edges;
+
+  const n = state.nodes.length;
+  state.adj = Array.from({length: n}, () => []);
+  def.edges.forEach(function(e){ state.adj[e[0]].push(e[1]); state.adj[e[1]].push(e[0]); });
+
+  const descEl = document.getElementById('topoDesc');
+  descEl.innerHTML = def.desc;
+  descEl.style.borderColor = tint(def.color, 0.55);
+  descEl.style.background  = tint(def.color, 0.07);
+
+  pendingSrc = -1;
+  state.path = [];
+  state.pathLen = 0;
+  state.dist = 0;
+  state.src = -1;
+  state.dst = -1;
+  state.phase = 'idle';
+  state.timer = 0;
+
+  lastHintPhase = '';
+  updateTopoHint();
+}
+
+topoCanvas.addEventListener('click', function(e){
+  const rect = topoCanvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width  * TW;
+  const y = (e.clientY - rect.top ) / rect.height * TH;
+
+  let best = -1, bestD = 58;
+  state.nodes.forEach(function(nd, i){
+    if (nd.type === 'switch') return;
+    const d = Math.hypot(nd.x - x, nd.y - y);
+    if (d < bestD){ bestD = d; best = i; }
+  });
+  if (best < 0) return;
+
+  if (pendingSrc === -1){
+    state.path = [];
+    state.pathLen = 0;
+    state.dist = 0;
+    state.src = -1;
+    state.dst = -1;
+    state.phase = 'idle';
+    state.timer = 0;
+    pendingSrc = best;
+    updateTopoHint();
+  } else if (pendingSrc === best){
+    pendingSrc = -1;
+    updateTopoHint();
+  } else {
+    setTrip(pendingSrc, best);
+    pendingSrc = -1;
+    updateTopoHint();
+  }
+});
+
+function updateTopo(dt){
+  if (state.phase === 'moving'){
+    state.dist += SPEED * dt;
+    if (state.dist >= state.pathLen){
+      state.dist = state.pathLen;
+      state.phase = 'arrived';
+      state.timer = 0;
+    }
+  } else if (state.phase === 'arrived'){
+    state.timer += dt;
+    if (state.timer > 1.8){
+      state.phase = 'idle';
+      state.path = [];
+      state.pathLen = 0;
+      state.dist = 0;
+      state.src = -1;
+      state.dst = -1;
+    }
+  }
+  if (state.phase !== lastHintPhase){
+    lastHintPhase = state.phase;
+    updateTopoHint();
+  }
+}
+
+function drawTopo(){
+  const ctx = tctx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, TW, TH);
+  ctx.drawImage(topoDots, 0, 0, TW, TH);
+
+  const nodes = state.nodes;
+  const accent = TOPOS[state.key].color;
+
+  ctx.lineCap = 'round';
+  for (const e of state.edges){
+    const a = nodes[e[0]], b = nodes[e[1]];
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = '#dfe3ec';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+  }
+
+  if (state.path.length > 1){
+    let acc = 0;
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 6;
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = 14;
+
+    for (let i = 0; i < state.path.length - 1; i++){
+      const A = nodes[state.path[i]];
+      const B = nodes[state.path[i+1]];
+      const len = Math.hypot(B.x - A.x, B.y - A.y) || 1;
+      const travelled = Math.max(0, Math.min(len, state.dist - acc));
+      if (travelled > 0){
+        const t = travelled / len;
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(A.x + (B.x - A.x) * t, A.y + (B.y - A.y) * t);
+        ctx.stroke();
+      }
+      acc += len;
+    }
+    ctx.restore();
+  }
+
+  nodes.forEach(function(nd, i){
+    let highlight = null;
+    if (i === state.src) highlight = '#ff6b6b';
+    else if (i === state.dst) highlight = '#ffb703';
+
+    if (nd.type === 'switch'){
+      /* 拓扑图里若出现交换机（仅内部保留，目前所有拓扑均用电脑） */
+      ctx.save();
+      ctx.translate(nd.x, nd.y);
+      roundRect(ctx, -52, -34, 104, 68, 15);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = highlight || INK; ctx.stroke();
+      ctx.font = 'bold 14px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = highlight || '#00c2a8';
+      ctx.fillText('交换机', 0, -6);
+      ctx.restore();
+    } else {
+      drawPC(ctx, nd.x, nd.y, nd.label, PALETTE[i % PALETTE.length], highlight);
+    }
+
+    if (i === pendingSrc){
+      ctx.save();
+      ctx.setLineDash([7, 7]);
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(nd.x, nd.y, 62 + Math.sin(clock * 5) * 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  });
+
+  if (state.path.length > 1 && state.phase !== 'idle'){
+    const pts = state.path.map(i => nodes[i]);
+    const pos = pointAt(pts, state.pathLen ? state.dist / state.pathLen : 0);
+    drawPacket(ctx, pos.x, pos.y, '#ffd43b', clock);
+
+    if (state.phase === 'arrived'){
+      const t = state.timer / 1.0;
+      const target = nodes[state.dst];
+      if (target && t <= 1){
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - t);
+        ctx.strokeStyle = '#ffb703';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([9, 7]);
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, 26 + t * 38, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+}
+
+/* ============================================================
+   板块 2：交换机 vs 集线器
+   ============================================================ */
+const SWW = 900, SWH = 440;
+const swCanvas = document.getElementById('switchCanvas');
+const sctx = setupCanvas(swCanvas, SWW, SWH);
+const swDots = makeDotPattern(SWW, SWH, 28, '#eceadf');
+
+const C = {x: 450, y: 220};
+const SW_PC = [
+  {x:450, y: 70, label:'电脑1'},
+  {x:745, y:174, label:'电脑2'},
+  {x:632, y:341, label:'电脑3'},
+  {x:268, y:341, label:'电脑4'},
+  {x:155, y:174, label:'电脑5'}
+];
+
+let swMode = 'switch';
+let swRound = null;
+
+function buildRound(mode){
+  if (mode === 'hub'){
+    const packets = [{pts:[SW_PC[0], C], start:0, dur:0.65, color:'#ffd43b', target:-1}];
+    for (let i = 1; i < SW_PC.length; i++){
+      packets.push({pts:[C, SW_PC[i]], start:0.65, dur:0.9, color:'#ff8fab', target:i});
+    }
+    return {packets: packets, t:0, duration: 0.65 + 0.9 + 1.5};
+  } else {
+    const packets = [
+      {pts:[SW_PC[0], C, SW_PC[2]], start:0, dur:1.5, color:'#4dabf7', target:2},
+      {pts:[SW_PC[1], C, SW_PC[3]], start:0, dur:1.5, color:'#00c2a8', target:3}
+    ];
+    return {packets: packets, t:0, duration: 1.5 + 1.5};
+  }
+}
+
+function updateSwitchDemo(dt){
+  if (!swRound) swRound = buildRound(swMode);
+  swRound.t += dt;
+  if (swRound.t > swRound.duration) swRound = buildRound(swMode);
+}
+
+function drawCenterDevice(ctx, cx, cy, isHub){
+  const color = isHub ? '#ff6b6b' : '#00c2a8';
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  ctx.shadowColor = tint(color, 0.5);
+  ctx.shadowBlur = 26;
+
+  roundRect(ctx, -52, -36, 104, 72, 16);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 3.5;
+  ctx.strokeStyle = color;
+  ctx.stroke();
+
+  ctx.font = 'bold 16px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  ctx.fillText(isHub ? '集线器' : '交换机', 0, -12);
+
+  for (let i = 0; i < 5; i++){
+    roundRect(ctx, -38 + i*16, 6, 11, 11, 3);
+    ctx.fillStyle = tint(color, 0.7);
+    ctx.fill();
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawSwitchDemo(){
+  const ctx = sctx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, SWW, SWH);
+  ctx.drawImage(swDots, 0, 0, SWW, SWH);
+
+  ctx.lineCap = 'round';
+  SW_PC.forEach(function(p){
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(C.x, C.y);
+    ctx.strokeStyle = '#dfe3ec';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+  });
+
+  const r = swRound || (swRound = buildRound(swMode));
+
+  for (const pk of r.packets){
+    const frac = (r.t - pk.start) / pk.dur;
+    if (frac <= 0 || frac >= 1) continue;
+
+    const segs = [];
+    let total = 0;
+    for (let i = 0; i < pk.pts.length - 1; i++){
+      const l = Math.hypot(pk.pts[i+1].x - pk.pts[i].x, pk.pts[i+1].y - pk.pts[i].y);
+      segs.push(l); total += l;
+    }
+
+    let d = frac * total;
+    ctx.save();
+    ctx.strokeStyle = pk.color;
+    ctx.lineWidth = 6;
+    ctx.shadowColor = pk.color;
+    ctx.shadowBlur = 12;
+
+    for (let i = 0; i < segs.length && d > 0; i++){
+      const t = Math.min(1, d / segs[i]);
+      const a = pk.pts[i], b = pk.pts[i+1];
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+      ctx.stroke();
+      d -= segs[i];
+    }
+    ctx.restore();
+  }
+
+  drawCenterDevice(ctx, C.x, C.y, swMode === 'hub');
+
+  SW_PC.forEach(function(p, i){
+    let highlight = null;
+    for (const pk of r.packets){
+      const frac = (r.t - pk.start) / pk.dur;
+      if (pk.target === i && frac >= 1 && frac < 1.7){
+        highlight = (swMode === 'hub') ? '#ff6b6b' : '#00c2a8';
+      }
+    }
+    drawPC(ctx, p.x, p.y, p.label, PALETTE[i % PALETTE.length], highlight);
+  });
+
+  for (const pk of r.packets){
+    const frac = (r.t - pk.start) / pk.dur;
+    if (frac < 0 || frac > 1) continue;
+    const pos = pointAt(pk.pts, frac);
+    drawPacket(ctx, pos.x, pos.y, pk.color, clock);
+  }
+
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 15px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+
+  const msg = swMode === 'hub'
+    ? '数据被广播给所有设备 → 浪费带宽，还容易冲突'
+    : '数据只发给目标设备 → 两对电脑可以同时通信';
+  const col = swMode === 'hub' ? '#ff6b6b' : '#00c2a8';
+
+  const tw = ctx.measureText(msg).width;
+  roundRect(ctx, SWW/2 - tw/2 - 16, 8, tw + 32, 32, 16);
+  ctx.fillStyle = tint(col, 0.13);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = tint(col, 0.5);
+  ctx.stroke();
+
+  ctx.fillStyle = col;
+  ctx.fillText(msg, SWW/2, 24);
+  ctx.restore();
+}
+
+const SWITCH_DESC = {
+  hub: `<b>📢 集线器（Hub）</b>：它是个「大喇叭」，不管数据是发给谁的，都会复制一份发给<b>所有</b>设备。<br>
+        <span class="warn">⚠️ 结果：</span>只有目标电脑会处理，其它电脑只能白收一份再丢掉——既浪费带宽，多台电脑同时发数据时还会互相<b>冲突</b>。`,
+  switch: `<b>🎯 交换机（Switch）</b>：它会自动记住每台电脑接在哪个端口上，像一位聪明的「分拣员」。<br>
+           <span class="ok">✅ 结果：</span>数据只从对应端口发往目标电脑，其它电脑完全不受影响；多对电脑还能<b>同时</b>通信，网络又快又安全。这也是星状拓扑里中心设备必须用交换机的原因。`
+};
+
+function setSwitchMode(mode){
+  swMode = mode;
+  swRound = buildRound(mode);
+  const descEl = document.getElementById('switchDesc');
+  descEl.innerHTML = SWITCH_DESC[mode];
+  const col = mode === 'hub' ? '#ff6b6b' : '#00c2a8';
+  descEl.style.borderColor = tint(col, 0.55);
+  descEl.style.background  = tint(col, 0.07);
+
+  document.querySelectorAll('#modeTabs .tab').forEach(function(b){
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+}
+
+/* ============================================================
+   板块 3：MAC 地址表演示
+   ============================================================ */
+const MAC_W = 900, MAC_H = 340;
+const macCanvas = document.getElementById('macCanvas');
+const macCtx = setupCanvas(macCanvas, MAC_W, MAC_H);
+const macDots = makeDotPattern(MAC_W, MAC_H, 28, '#eceadf');
+
+const MAC_SW = {x:450, y:175, w:140, h:90};
+
+const MAC_PCS = [
+  {id:'A', label:'电脑A', x:150, y:90,  port:1, px:380, py:155},
+  {id:'B', label:'电脑B', x:150, y:260, port:2, px:380, py:195},
+  {id:'C', label:'电脑C', x:750, y:90,  port:3, px:520, py:155},
+  {id:'D', label:'电脑D', x:750, y:260, port:4, px:520, py:195}
+];
+
+const MAC_TIMING = {
+  toSwitch: 0.85,
+  lookup:   1.05,
+  toDest:   0.85,
+  hold:     2.4
+};
+
+let macDemo = null;   // {src, dst, phase, t}
+
+function macPC(id){
+  for (const p of MAC_PCS) if (p.id === id) return p;
+  return null;
+}
+
+function highlightMacRow(dst){
+  document.querySelectorAll('.mac-table tr').forEach(function(tr){ tr.classList.remove('hl'); });
+  const row = document.getElementById('macRow-' + dst);
+  if (row) row.classList.add('hl');
+}
+
+function clearMacHighlight(){
+  document.querySelectorAll('.mac-table tr').forEach(function(tr){ tr.classList.remove('hl'); });
+}
+
+function startMacDemo(src, dst){
+  macDemo = {src: src, dst: dst, phase: 'toSwitch', t: 0};
+  clearMacHighlight();
+}
+
+function updateMac(dt){
+  if (!macDemo) return;
+  macDemo.t += dt;
+
+  if (macDemo.phase === 'toSwitch'){
+    if (macDemo.t >= MAC_TIMING.toSwitch){
+      macDemo.phase = 'lookup';
+      macDemo.t = 0;
+      highlightMacRow(macDemo.dst);
+    }
+  } else if (macDemo.phase === 'lookup'){
+    if (macDemo.t >= MAC_TIMING.lookup){
+      macDemo.phase = 'toDest';
+      macDemo.t = 0;
+    }
+  } else if (macDemo.phase === 'toDest'){
+    if (macDemo.t >= MAC_TIMING.toDest){
+      macDemo.phase = 'hold';
+      macDemo.t = 0;
+    }
+  } else if (macDemo.phase === 'hold'){
+    if (macDemo.t >= MAC_TIMING.hold){
+      macDemo = null;
+      clearMacHighlight();
+    }
+  }
+}
+
+function drawMac(){
+  const ctx = macCtx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, MAC_W, MAC_H);
+  ctx.drawImage(macDots, 0, 0, MAC_W, MAC_H);
+
+  const srcPC = macDemo ? macPC(macDemo.src) : null;
+  const dstPC = macDemo ? macPC(macDemo.dst) : null;
+
+  /* 连线 */
+  ctx.lineCap = 'round';
+  MAC_PCS.forEach(function(p){
+    const related = macDemo && (p.id === macDemo.src || p.id === macDemo.dst);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(MAC_SW.x, MAC_SW.y);
+    ctx.strokeStyle = related ? '#ffd43b' : '#dfe3ec';
+    ctx.lineWidth = related ? 6 : 5;
+    if (related){ ctx.shadowColor = '#ffd43b'; ctx.shadowBlur = 12; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+
+  /* 交换机 */
+  const swActive = macDemo && macDemo.phase === 'lookup';
+  ctx.save();
+  ctx.translate(MAC_SW.x, MAC_SW.y);
+
+  if (swActive){ ctx.shadowColor = '#ffd43b'; ctx.shadowBlur = 28; }
+  roundRect(ctx, -70, -45, 140, 90, 16);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 3.4;
+  ctx.strokeStyle = swActive ? '#ffb703' : '#00c2a8';
+  ctx.stroke();
+
+  ctx.font = 'bold 16px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#00c2a8';
+  ctx.fillText('交换机', 0, -8);
+
+  /* 4 个端口圆点 */
+  const portLabels = ['1','2','3','4'];
+  const ports = MAC_PCS.map(function(p){ return {x: p.px - MAC_SW.x, y: p.py - MAC_SW.y, port: p.port, id: p.id}; });
+  ports.forEach(function(pt){
+    const active = macDemo && (macDemo.src === pt.id || macDemo.dst === pt.id);
+    if (active){
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 11, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,212,59,0.35)';
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 7, 0, Math.PI*2);
+    ctx.fillStyle = active ? '#ffd43b' : '#eef2f7';
+    ctx.fill();
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    ctx.font = 'bold 11px "Comic Sans MS","KaiTi",sans-serif';
+    ctx.fillStyle = INK;
+    ctx.fillText(portLabels[pt.port - 1], pt.x, pt.y + (pt.y < 0 ? -18 : 20));
+  });
+
+  ctx.restore();
+
+  /* 四台电脑 */
+  MAC_PCS.forEach(function(p){
+    let hl = null;
+    if (macDemo){
+      if (p.id === macDemo.src) hl = '#ff6b6b';
+      else if (p.id === macDemo.dst && (macDemo.phase === 'lookup' || macDemo.phase === 'toDest' || macDemo.phase === 'hold')) hl = '#ffb703';
+    }
+    drawPC(ctx, p.x, p.y, p.label, PALETTE[MAC_PCS.indexOf(p) % PALETTE.length], hl);
+  });
+
+  /* 数据包 */
+  let pktPos = null;
+  if (macDemo){
+    if (macDemo.phase === 'toSwitch' && srcPC){
+      const f = Math.min(1, macDemo.t / MAC_TIMING.toSwitch);
+      pktPos = {
+        x: srcPC.x + (MAC_SW.x - srcPC.x) * f,
+        y: srcPC.y + (MAC_SW.y - srcPC.y) * f
+      };
+    } else if (macDemo.phase === 'lookup'){
+      pktPos = {x: MAC_SW.x, y: MAC_SW.y};
+    } else if (macDemo.phase === 'toDest' && dstPC){
+      const f = Math.min(1, macDemo.t / MAC_TIMING.toDest);
+      pktPos = {
+        x: MAC_SW.x + (dstPC.x - MAC_SW.x) * f,
+        y: MAC_SW.y + (dstPC.y - MAC_SW.y) * f
+      };
+    } else if (macDemo.phase === 'hold' && dstPC){
+      pktPos = {x: dstPC.x, y: dstPC.y};
+    }
+  }
+
+  if (pktPos){
+    drawPacket(ctx, pktPos.x, pktPos.y, '#ffd43b', clock);
+
+    /* 查表时在交换机上画个脉冲圈 */
+    if (macDemo && macDemo.phase === 'lookup'){
+      const t = macDemo.t / MAC_TIMING.lookup;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - t);
+      ctx.strokeStyle = '#ffb703';
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.arc(MAC_SW.x, MAC_SW.y, 70 + t * 40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* 顶部提示 */
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 14.5px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+  let tip = '💡 点按钮，看交换机怎么按 MAC 地址表把数据送到正确的端口';
+  let tipColor = '#8a93a8';
+  if (macDemo){
+    if (macDemo.phase === 'toSwitch'){
+      tip = '📨 【' + macDemo.src + '】正在发送数据到交换机…';
+      tipColor = '#e8590c';
+    } else if (macDemo.phase === 'lookup'){
+      tip = '🔍 交换机查表：目标 MAC 地址 → 端口 ' + macPC(macDemo.dst).port + '（表格已高亮）';
+      tipColor = '#b3541e';
+    } else if (macDemo.phase === 'toDest'){
+      tip = '🎯 只从端口 ' + macPC(macDemo.dst).port + ' 转发，其他电脑完全收不到';
+      tipColor = '#0b7285';
+    } else {
+      tip = '🎉 数据送达【' + macDemo.dst + '】！';
+      tipColor = '#12a150';
+    }
+  }
+  ctx.fillStyle = tipColor;
+  ctx.fillText(tip, MAC_W / 2, 22);
+  ctx.restore();
+}
+
+/* ============================================================
+   板块 4：动手实验
+   ============================================================ */
+const LW = 900, LH = 520;
+const lanCanvas = document.getElementById('lanCanvas');
+const lctx = setupCanvas(lanCanvas, LW, LH);
+const lanDots = makeDotPattern(LW, LH, 28, '#eceadf');
+
+let lanDevices = [];
+let lanLinks = [];
+let lanMode = 'move';
+let lanDrag = null;
+let lanLinkDrag = null;
+let lanPacket = null;
+let lanPendingSrc = null;
+let lanAutoSent = false;
+let lastLanStatusKey = '';
+
+function initLan(){
+  lanDevices = [
+    {id:'pc1', type:'pc',     x:150, y:110, label:'电脑1'},
+    {id:'pc2', type:'pc',     x:750, y:110, label:'电脑2'},
+    {id:'pc3', type:'pc',     x:150, y:400, label:'电脑3'},
+    {id:'pc4', type:'pc',     x:750, y:400, label:'电脑4'},
+    {id:'sw',  type:'switch', x:450, y:255, label:'交换机'}
+  ];
+  lanLinks = [];
+  lanPacket = null;
+  lanDrag = null;
+  lanLinkDrag = null;
+  lanPendingSrc = null;
+  lanAutoSent = false;
+  lastLanStatusKey = '';
+  updateLanStatus();
+  updateLanHint();
+}
+
+function getDevice(id){
+  for (const d of lanDevices) if (d.id === id) return d;
+  return null;
+}
+
+function countLinks(id){
+  let n = 0;
+  for (const l of lanLinks) if (l.a === id || l.b === id) n++;
+  return n;
+}
+
+/* 唯一限制：交换机只有 5 个端口。电脑不限网卡数量 */
+function canLink(a, b){
+  if (a === b) return false;
+  if (lanLinks.some(l => (l.a===a&&l.b===b) || (l.a===b&&l.b===a))) return false;
+  const da = getDevice(a), db = getDevice(b);
+  if (!da || !db) return false;
+  if (da.type === 'switch' && countLinks(a) >= 5) return false;
+  if (db.type === 'switch' && countLinks(b) >= 5) return false;
+  return true;
+}
+
+function hitDevice(x, y){
+  for (let i = lanDevices.length - 1; i >= 0; i--){
+    const d = lanDevices[i];
+    const r = d.type === 'switch' ? 60 : 50;
+    if (Math.hypot(d.x - x, d.y - y) < r) return d;
+  }
+  return null;
+}
+
+function hitLink(x, y){
+  for (let i = lanLinks.length - 1; i >= 0; i--){
+    const a = getDevice(lanLinks[i].a), b = getDevice(lanLinks[i].b);
+    if (!a || !b) continue;
+    if (distToSeg(x, y, a.x, a.y, b.x, b.y) < 13) return i;
+  }
+  return -1;
+}
+
+function lanPos(e){
+  const rect = lanCanvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) / rect.width  * LW,
+    y: (e.clientY - rect.top ) / rect.height * LH
+  };
+}
+
+function countConnectedPCs(){
+  let n = 0;
+  for (const d of lanDevices){
+    if (d.type === 'pc' && countLinks(d.id) > 0) n++;
+  }
+  return n;
+}
+
+function updateLanStatus(){
+  const connPC = countConnectedPCs();
+  const usedPort = lanLinks.filter(l => l.a === 'sw' || l.b === 'sw').length;
+  const key = connPC + '|' + usedPort;
+  if (key === lastLanStatusKey) return;
+  lastLanStatusKey = key;
+
+  document.getElementById('connPC').textContent = connPC;
+  document.getElementById('usedPort').textContent = usedPort;
+  document.getElementById('dotPC').classList.toggle('on', connPC > 0);
+  document.getElementById('dotSW').classList.toggle('on', usedPort > 0);
+
+  const msgEl = document.getElementById('statMsg');
+  if (connPC === 4){
+    msgEl.textContent = '🎉 局域网组建成功！切到「发送数据」让电脑互相通信吧';
+    msgEl.className = 'stat-msg ok';
+
+    if (!lanAutoSent){
+      lanAutoSent = true;
+      setTimeout(function(){
+        if (countConnectedPCs() === 4 && !lanPacket) pickAndSend();
+      }, 700);
+    }
+  } else if (connPC === 0){
+    msgEl.textContent = '还没有电脑连上网线，动手试试吧～';
+    msgEl.className = 'stat-msg';
+  } else {
+    msgEl.textContent = '还差 ' + (4 - connPC) + ' 台电脑没连上，继续加油！';
+    msgEl.className = 'stat-msg';
+  }
+}
+
+function updateLanHint(){
+  const el = document.getElementById('lanHint');
+  if (lanMode === 'send'){
+    if (lanPendingSrc){
+      const d = getDevice(lanPendingSrc);
+      el.textContent = '📨 已选择【' + (d ? d.label : '') + '】作为发送方，再点一台电脑作为接收方';
+      el.classList.add('picking');
+    } else {
+      el.textContent = '📨 点击一台已经连上网线的电脑，让它发送数据包';
+      el.classList.remove('picking');
+    }
+  } else if (lanMode === 'link'){
+    el.textContent = '🔗 从一台设备按住鼠标，拖到另一台设备，就能连出一根网线';
+    el.classList.remove('picking');
+  } else if (lanMode === 'erase'){
+    el.textContent = '✂️ 点击任意一根网线，即可把它删除';
+    el.classList.remove('picking');
+  } else {
+    el.textContent = '🖐 拖动设备摆好位置，再切换到「连接网线」';
+    el.classList.remove('picking');
+  }
+}
+
+function flashMsg(text){
+  const msgEl = document.getElementById('statMsg');
+  msgEl.textContent = text;
+  msgEl.className = 'stat-msg warn';
+  lastLanStatusKey = '__flash__';
+  setTimeout(function(){ lastLanStatusKey = ''; updateLanStatus(); }, 1600);
+}
+
+function lanFindPath(startId, endId){
+  if (startId === endId) return null;
+  const adj = {};
+  lanDevices.forEach(function(d){ adj[d.id] = []; });
+  lanLinks.forEach(function(l){
+    if (adj[l.a] && adj[l.b]){ adj[l.a].push(l.b); adj[l.b].push(l.a); }
+  });
+
+  const prev = {};
+  const seen = {};
+  const q = [startId];
+  seen[startId] = true;
+  prev[startId] = null;
+
+  while (q.length){
+    const u = q.shift();
+    for (const v of adj[u] || []){
+      if (!seen[v]){
+        seen[v] = true;
+        prev[v] = u;
+        if (v === endId){
+          const p = [];
+          let cur = endId;
+          while (cur){ p.unshift(cur); cur = prev[cur]; }
+          return p;
+        }
+        q.push(v);
+      }
+    }
+  }
+  return null;
+}
+
+function startLanPacket(aId, bId){
+  const pathIds = lanFindPath(aId, bId);
+  if (!pathIds || pathIds.length < 2) return false;
+
+  const pts = [];
+  for (const id of pathIds){
+    const d = getDevice(id);
+    if (!d) return false;
+    pts.push({x: d.x, y: d.y});
+  }
+
+  const len = polyLen(pts);
+  lanPacket = {
+    pathIds: pathIds,
+    pts: pts,
+    t: 0,
+    dur: Math.max(0.6, len / 260)
+  };
+  return true;
+}
+
+function pickAndSend(){
+  const pcs = lanDevices.filter(d => d.type === 'pc' && countLinks(d.id) > 0);
+  if (pcs.length < 2) return false;
+
+  const pairs = [];
+  for (let i = 0; i < pcs.length; i++){
+    for (let j = i + 1; j < pcs.length; j++){
+      pairs.push([pcs[i].id, pcs[j].id]);
+    }
+  }
+  pairs.sort(function(){ return Math.random() - 0.5; });
+
+  for (const pr of pairs){
+    if (startLanPacket(pr[0], pr[1])) return true;
+  }
+  return false;
+}
+
+/* ---- 鼠标交互 ---- */
+lanCanvas.addEventListener('mousedown', function(e){
+  const p = lanPos(e);
+
+  if (lanMode === 'move'){
+    const d = hitDevice(p.x, p.y);
+    if (d){
+      lanDrag = { id: d.id, ox: d.x - p.x, oy: d.y - p.y };
+      lanPacket = null;
+      lanCanvas.style.cursor = 'grabbing';
+    }
+  } else if (lanMode === 'link'){
+    const d = hitDevice(p.x, p.y);
+    if (d){
+      lanLinkDrag = { fromId: d.id, x: p.x, y: p.y };
+    }
+  } else if (lanMode === 'erase'){
+    const idx = hitLink(p.x, p.y);
+    if (idx >= 0){
+      lanLinks.splice(idx, 1);
+      lanPacket = null;
+      updateLanStatus();
+    }
+  } else if (lanMode === 'send'){
+    const d = hitDevice(p.x, p.y);
+    if (!d) return;
+
+    if (d.type === 'switch'){
+      flashMsg('💡 交换机自己不产生数据，请点击一台电脑');
+      return;
+    }
+    if (countLinks(d.id) === 0){
+      flashMsg('❌ 这台电脑还没有连上网线');
+      return;
+    }
+
+    if (!lanPendingSrc){
+      lanPendingSrc = d.id;
+      updateLanHint();
+    } else if (lanPendingSrc === d.id){
+      lanPendingSrc = null;
+      updateLanHint();
+    } else {
+      if (!startLanPacket(lanPendingSrc, d.id)){
+        flashMsg('❌ 这两台电脑之间没有连通的线路');
+      }
+      lanPendingSrc = null;
+      updateLanHint();
+    }
+  }
+});
+
+lanCanvas.addEventListener('mousemove', function(e){
+  if (lanDrag || lanLinkDrag) return;
+  const p = lanPos(e);
+  const d = hitDevice(p.x, p.y);
+  if (lanMode === 'move'){
+    lanCanvas.style.cursor = d ? 'grab' : 'default';
+  } else if (lanMode === 'link'){
+    lanCanvas.style.cursor = d ? 'crosshair' : 'default';
+  } else if (lanMode === 'erase'){
+    lanCanvas.style.cursor = hitLink(p.x, p.y) >= 0 ? 'pointer' : 'default';
+  } else {
+    lanCanvas.style.cursor = d ? 'pointer' : 'default';
+  }
+});
+
+window.addEventListener('mousemove', function(e){
+  if (!lanDrag && !lanLinkDrag) return;
+  const p = lanPos(e);
+  if (lanDrag){
+    const d = getDevice(lanDrag.id);
+    if (!d) return;
+    d.x = Math.max(70, Math.min(LW - 70, p.x + lanDrag.ox));
+    d.y = Math.max(70, Math.min(LH - 70, p.y + lanDrag.oy));
+  }
+  if (lanLinkDrag){
+    lanLinkDrag.x = p.x;
+    lanLinkDrag.y = p.y;
+  }
+});
+
+window.addEventListener('mouseup', function(e){
+  if (lanDrag){
+    lanDrag = null;
+    lanCanvas.style.cursor = lanMode === 'move' ? 'grab' : '';
+  }
+  if (lanLinkDrag){
+    const p = lanPos(e);
+    const target = hitDevice(p.x, p.y);
+    const fromId = lanLinkDrag.fromId;
+    lanLinkDrag = null;
+
+    if (target && target.id !== fromId){
+      if (canLink(fromId, target.id)){
+        lanLinks.push({ a: fromId, b: target.id });
+        updateLanStatus();
+      } else {
+        if (countLinks('sw') >= 5 && (fromId === 'sw' || target.id === 'sw')){
+          flashMsg('❌ 交换机的 5 个端口已经全部用完了');
+        } else {
+          flashMsg('❌ 这两台设备已经连过网线了');
+        }
+      }
+    }
+  }
+});
+
+/* ---- 绘制 ---- */
+function drawLanPC(ctx, d, connected){
+  drawPC(ctx, d.x, d.y, d.label, '#4dabf7', null);
+
+  const lx = d.x + 15, ly = d.y - 25;
+  if (connected){
+    ctx.beginPath();
+    ctx.arc(lx, ly, 9, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(81,207,102,0.25)';
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(lx, ly, 5, 0, Math.PI*2);
+  ctx.fillStyle = connected ? '#51cf66' : '#d5dae4';
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+}
+
+function drawLanSwitch(ctx, d, portsUsed){
+  const color = '#00c2a8';
+  ctx.save();
+  ctx.translate(d.x, d.y);
+
+  roundRect(ctx, -58, -40, 116, 80, 16);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.lineWidth = 3.2;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+
+  ctx.font = 'bold 15px "Comic Sans MS","KaiTi","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  ctx.fillText('交换机', 0, -20);
+
+  for (let i = 0; i < 5; i++){
+    const px = -43 + i * 18;
+
+    roundRect(ctx, px, -2, 14, 14, 3);
+    ctx.fillStyle = '#f0f3f8';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#a9b4c6';
+    ctx.stroke();
+
+    const on = i < portsUsed;
+    const ly = 24;
+    if (on){
+      ctx.beginPath();
+      ctx.arc(px + 7, ly, 8.5, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(81,207,102,0.25)';
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(px + 7, ly, 4.5, 0, Math.PI*2);
+    ctx.fillStyle = on ? '#51cf66' : '#d5dae4';
+    ctx.fill();
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawLan(){
+  const ctx = lctx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, LW, LH);
+  ctx.drawImage(lanDots, 0, 0, LW, LH);
+
+  /* 网线 */
+  ctx.lineCap = 'round';
+  for (const l of lanLinks){
+    const a = getDevice(l.a), b = getDevice(l.b);
+    if (!a || !b) continue;
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = '#b7e4c7';
+    ctx.lineWidth = 9;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = '#38a169';
+    ctx.lineWidth = 4.5;
+    ctx.stroke();
+  }
+
+  /* 正在拖拽的网线 */
+  if (lanLinkDrag){
+    const a = getDevice(lanLinkDrag.fromId);
+    if (a){
+      ctx.save();
+      ctx.setLineDash([10, 8]);
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#4dabf7';
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(lanLinkDrag.x, lanLinkDrag.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* 数据包已走过的路径高亮 */
+  if (lanPacket){
+    const frac = Math.min(1, lanPacket.t / lanPacket.dur);
+    let acc = 0;
+    const total = polyLen(lanPacket.pts);
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#ffd43b';
+    ctx.lineWidth = 6;
+    ctx.shadowColor = '#ffd43b';
+    ctx.shadowBlur = 14;
+
+    for (let i = 0; i < lanPacket.pts.length - 1; i++){
+      const A = lanPacket.pts[i], B = lanPacket.pts[i+1];
+      const len = Math.hypot(B.x - A.x, B.y - A.y) || 1;
+      const travelled = Math.max(0, Math.min(len, frac * total - acc));
+      if (travelled > 0){
+        const t = travelled / len;
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(A.x + (B.x - A.x) * t, A.y + (B.y - A.y) * t);
+        ctx.stroke();
+      }
+      acc += len;
+    }
+    ctx.restore();
+  }
+
+  /* 设备 */
+  const portsUsed = lanLinks.filter(l => l.a === 'sw' || l.b === 'sw').length;
+
+  for (const d of lanDevices){
+    if (d.type === 'switch') continue;
+    drawLanPC(ctx, d, countLinks(d.id) > 0);
+  }
+  const sw = getDevice('sw');
+  if (sw) drawLanSwitch(ctx, sw, portsUsed);
+
+  /* 待发送的电脑脉冲圈 */
+  if (lanMode === 'send' && lanPendingSrc){
+    const d = getDevice(lanPendingSrc);
+    if (d){
+      ctx.save();
+      ctx.setLineDash([7, 7]);
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 56 + Math.sin(clock * 5) * 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* 数据包 */
+  if (lanPacket){
+    const frac = Math.min(1, lanPacket.t / lanPacket.dur);
+    const pos = pointAt(lanPacket.pts, frac);
+    drawPacket(ctx, pos.x, pos.y, '#ffd43b', clock);
+
+    if (lanPacket.t > lanPacket.dur){
+      const t = Math.min(1, (lanPacket.t - lanPacket.dur) / 0.9);
+      const end = lanPacket.pts[lanPacket.pts.length - 1];
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - t);
+      ctx.strokeStyle = '#ffd43b';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([9, 7]);
+      ctx.beginPath();
+      ctx.arc(end.x, end.y, 30 + t * 36, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+function updateLan(dt){
+  if (!lanPacket) return;
+  lanPacket.t += dt;
+  if (lanPacket.t > lanPacket.dur + 0.9){
+    lanPacket = null;
+  }
+}
+
+/* ---- 实验工具栏 ---- */
+document.querySelectorAll('.tool[data-mode]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tool[data-mode]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    lanMode = btn.dataset.mode;
+    lanDrag = null;
+    lanLinkDrag = null;
+    lanPendingSrc = null;
+    lanCanvas.style.cursor = lanMode === 'move' ? 'grab'
+                           : lanMode === 'link' ? 'crosshair'
+                           : 'pointer';
+    updateLanHint();
+  });
+});
+
+document.getElementById('lanReset').addEventListener('click', function(){
+  initLan();
+  lanCanvas.style.cursor = lanMode === 'move' ? 'grab'
+                         : lanMode === 'link' ? 'crosshair' : 'pointer';
+});
+
+/* ============================================================
+   交互绑定
+   ============================================================ */
+document.querySelectorAll('#nTabs .tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    setN(parseInt(btn.dataset.n, 10));
+  });
+});
+
+document.querySelectorAll('#topoTabs .tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('#topoTabs .tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    loadTopo(btn.dataset.topo);
+  });
+});
+
+document.querySelectorAll('#modeTabs .tab').forEach(function(btn){
+  btn.addEventListener('click', function(){ setSwitchMode(btn.dataset.mode); });
+});
+
+document.getElementById('macAtoC').addEventListener('click', function(){
+  startMacDemo('A', 'C');
+});
+document.getElementById('macBtoD').addEventListener('click', function(){
+  startMacDemo('B', 'D');
+});
+document.getElementById('macClear').addEventListener('click', function(){
+  macDemo = null;
+  clearMacHighlight();
+});
+
+/* ============================================================
+   主循环
+   ============================================================ */
+let lastTime = performance.now();
+
+function frame(now){
+  let dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (dt > 0.05) dt = 0.05;
+  clock += dt;
+
+  updateN(dt);
+  drawN();
+
+  updateTopo(dt);
+  drawTopo();
+
+  updateSwitchDemo(dt);
+  drawSwitchDemo();
+
+  updateMac(dt);
+  drawMac();
+
+  updateLan(dt);
+  drawLan();
+  updateLanStatus();
+
+  requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+setN(4);
+
+document.querySelector('#topoTabs .tab[data-topo="linear"]').classList.add('active');
+loadTopo('linear');
+
+document.querySelector('#modeTabs .tab[data-mode="switch"]').classList.add('active');
+setSwitchMode('switch');
+
+initLan();
+lanCanvas.style.cursor = 'grab';
+
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
