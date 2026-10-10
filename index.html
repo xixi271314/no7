@@ -275,7 +275,25 @@
   </header>
 
   <!-- ============================================================
-       板块 0：n 台机器互连方法
+       板块 1：拓扑演示（已与「n 台机器互连」对换，现排第一）
+       ============================================================ -->
+  <section class="card">
+    <div class="tabs" id="topoTabs">
+      <button class="tab" data-topo="linear" style="--c:#ff922b">🍭 线性拓扑</button>
+      <button class="tab" data-topo="star"   style="--c:#4dabf7">⭐ 星状拓扑</button>
+      <button class="tab" data-topo="ring"   style="--c:#9b7ede">💫 环状拓扑</button>
+      <button class="tab" data-topo="mesh"   style="--c:#51cf66">🕸️ 网状拓扑</button>
+      <button class="tab" data-topo="tree"   style="--c:#ff8fab">🌳 树状拓扑</button>
+    </div>
+
+    <canvas id="topoCanvas"></canvas>
+
+    <div class="hint" id="topoHint"></div>
+    <div class="desc" id="topoDesc"></div>
+  </section>
+
+  <!-- ============================================================
+       板块 2：n 台机器互连方法（已与「拓扑演示」对换，现排第二）
        ============================================================ -->
   <section class="card">
     <h2>📐 n 台机器怎么<span class="hl">互连</span>？</h2>
@@ -300,25 +318,7 @@
   </section>
 
   <!-- ============================================================
-       板块 1：拓扑演示
-       ============================================================ -->
-  <section class="card">
-    <div class="tabs" id="topoTabs">
-      <button class="tab" data-topo="linear" style="--c:#ff922b">🍭 线性拓扑</button>
-      <button class="tab" data-topo="star"   style="--c:#4dabf7">⭐ 星状拓扑</button>
-      <button class="tab" data-topo="ring"   style="--c:#9b7ede">💫 环状拓扑</button>
-      <button class="tab" data-topo="mesh"   style="--c:#51cf66">🕸️ 网状拓扑</button>
-      <button class="tab" data-topo="tree"   style="--c:#ff8fab">🌳 树状拓扑</button>
-    </div>
-
-    <canvas id="topoCanvas"></canvas>
-
-    <div class="hint" id="topoHint"></div>
-    <div class="desc" id="topoDesc"></div>
-  </section>
-
-  <!-- ============================================================
-       板块 2：交换机 vs 集线器
+       板块 3：交换机 vs 集线器
        ============================================================ -->
   <section class="card">
     <h2>中心设备 <span class="hl">交换机</span> 的作用</h2>
@@ -334,7 +334,7 @@
   </section>
 
   <!-- ============================================================
-       板块 3：MAC 地址表
+       板块 4：MAC 地址表
        ============================================================ -->
   <section class="card">
     <h2>📋 交换机怎么知道数据发给谁？<span class="hl">MAC 地址表</span></h2>
@@ -369,7 +369,7 @@
   </section>
 
   <!-- ============================================================
-       板块 4：动手实验
+       板块 5：动手实验
        ============================================================ -->
   <section class="card">
     <h2>🧪 动手实验：<span class="hl">组建小型局域网</span></h2>
@@ -574,7 +574,7 @@ function drawPacket(ctx, x, y, color, phase){
 let clock = 0;
 
 /* ============================================================
-   板块 0：n 台机器互连
+   板块 2：n 台机器互连
    ============================================================ */
 const NW = 900, NH = 420;
 const nCanvas = document.getElementById('nCanvas');
@@ -1020,7 +1020,7 @@ function drawTopo(){
 }
 
 /* ============================================================
-   板块 2：交换机 vs 集线器
+   板块 3：交换机 vs 集线器
    ============================================================ */
 const SWW = 900, SWH = 440;
 const swCanvas = document.getElementById('switchCanvas');
@@ -1208,7 +1208,7 @@ function setSwitchMode(mode){
 }
 
 /* ============================================================
-   板块 3：MAC 地址表演示
+   板块 4：MAC 地址表演示
    ============================================================ */
 const MAC_W = 900, MAC_H = 340;
 const macCanvas = document.getElementById('macCanvas');
@@ -1428,7 +1428,7 @@ function drawMac(){
 }
 
 /* ============================================================
-   板块 4：动手实验
+   板块 5：动手实验
    ============================================================ */
 const LW = 900, LH = 520;
 const lanCanvas = document.getElementById('lanCanvas');
