@@ -28,7 +28,7 @@
   }
   .wrap{max-width:1000px;margin:0 auto;}
 
-  header{text-align:center;margin-bottom:24px;}
+  header{text-align:center;margin-bottom:20px;}
   header h1{
     margin:0 0 10px;
     font-size:clamp(21px,3.6vw,32px);
@@ -42,6 +42,41 @@
     font-size:14.5px;
     color:#7c8398;
     letter-spacing:.5px;
+  }
+
+  /* ---------- 顶部主标签（知识 / 实操） ---------- */
+  .main-tabs{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  .main-tab{
+    cursor:pointer;
+    border:3px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    padding:14px 40px;
+    border-radius:18px;
+    font-size:17px;
+    font-family:inherit;
+    font-weight:800;
+    letter-spacing:1px;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+    box-shadow:5px 5px 0 rgba(45,49,66,.16);
+    user-select:none;
+  }
+  .main-tab:hover{
+    transform:translate(-2px,-2px);
+    box-shadow:7px 7px 0 rgba(45,49,66,.22);
+  }
+  .main-tab:active{transform:translate(1px,1px);box-shadow:2px 2px 0 rgba(45,49,66,.2);}
+  .main-tab.active{
+    background:#ffd43b;
+    color:var(--ink);
+    box-shadow:3px 3px 0 var(--ink);
+    transform:translate(1px,1px);
   }
 
   .card{
@@ -172,6 +207,17 @@
   .tool.active{background:#ffe066;box-shadow:2px 2px 0 var(--ink);transform:translate(1px,1px);}
   .tool.reset{background:#f1f3f5;}
 
+  /* n 台机器板块“开始连线”按钮 */
+  .n-action{
+    text-align:center;
+    margin:6px 0 16px;
+  }
+  #nStartBtn{
+    padding:12px 30px;
+    font-size:15.5px;
+    border-radius:14px;
+  }
+
   /* ---------- 实验状态栏 ---------- */
   .lan-status{
     display:flex;
@@ -208,6 +254,7 @@
     font-weight:700;
     color:#1f2a44;
     letter-spacing:.5px;
+    min-height:32px;
   }
   .n-info b{
     display:inline-block;
@@ -275,129 +322,144 @@
   </header>
 
   <!-- ============================================================
-       板块 1：拓扑演示（已与「n 台机器互连」对换，现排第一）
+       顶部主标签：知识学习 / 动手实操
        ============================================================ -->
-  <section class="card">
-    <div class="tabs" id="topoTabs">
-      <button class="tab" data-topo="linear" style="--c:#ff922b">🍭 线性拓扑</button>
-      <button class="tab" data-topo="star"   style="--c:#4dabf7">⭐ 星状拓扑</button>
-      <button class="tab" data-topo="ring"   style="--c:#9b7ede">💫 环状拓扑</button>
-      <button class="tab" data-topo="mesh"   style="--c:#51cf66">🕸️ 网状拓扑</button>
-      <button class="tab" data-topo="tree"   style="--c:#ff8fab">🌳 树状拓扑</button>
-    </div>
-
-    <canvas id="topoCanvas"></canvas>
-
-    <div class="hint" id="topoHint"></div>
-    <div class="desc" id="topoDesc"></div>
-  </section>
+  <div class="main-tabs">
+    <button class="main-tab active" data-panel="knowledge">📚 知识学习</button>
+    <button class="main-tab" data-panel="practice">🧪 动手实操</button>
+  </div>
 
   <!-- ============================================================
-       板块 2：n 台机器互连方法（已与「拓扑演示」对换，现排第二）
+       知识面板：包含板块 1-4
        ============================================================ -->
-  <section class="card">
-    <h2>📐 n 台机器怎么<span class="hl">互连</span>？</h2>
-    <p class="sub-title">每两台机器之间都拉一根网线，机器越多，线越多</p>
+  <div id="panel-knowledge">
 
-    <div class="n-tabs" id="nTabs">
-      <button class="tab" data-n="2" style="--c:#4dabf7">2 台</button>
-      <button class="tab" data-n="3" style="--c:#ff922b">3 台</button>
-      <button class="tab" data-n="4" style="--c:#9b7ede">4 台</button>
-      <button class="tab" data-n="5" style="--c:#51cf66">5 台</button>
-      <button class="tab" data-n="6" style="--c:#ff8fab">6 台</button>
-    </div>
+    <!-- 板块 1：拓扑演示 -->
+    <section class="card">
+      <div class="tabs" id="topoTabs">
+        <button class="tab" data-topo="linear" style="--c:#ff922b">🍭 线性拓扑</button>
+        <button class="tab" data-topo="star"   style="--c:#4dabf7">⭐ 星状拓扑</button>
+        <button class="tab" data-topo="ring"   style="--c:#9b7ede">💫 环状拓扑</button>
+        <button class="tab" data-topo="mesh"   style="--c:#51cf66">🕸️ 网状拓扑</button>
+        <button class="tab" data-topo="tree"   style="--c:#ff8fab">🌳 树状拓扑</button>
+      </div>
 
-    <canvas id="nCanvas"></canvas>
+      <canvas id="topoCanvas"></canvas>
 
-    <div class="n-info" id="nInfo"></div>
+      <div class="hint" id="topoHint"></div>
+      <div class="desc" id="topoDesc"></div>
+    </section>
 
-    <div class="desc">
-      <b>💡 规律：</b>n 台机器两两互连，网线数量 = n × (n − 1) ÷ 2。<br>
-      机器少的时候还凑合，一旦超过 5 台，线就多得吓人——所以真实网络里我们用<b>交换机</b>来解决问题（下面几块内容就会讲到）。
-    </div>
-  </section>
+    <!-- 板块 2：n 台机器互连（默认 2 台，需点击按钮才连线） -->
+    <section class="card">
+      <h2>📐 n 台机器怎么<span class="hl">互连</span>？</h2>
+      <p class="sub-title">先动脑想一想：让每两台机器之间都连一根网线，n 台机器一共需要几根网线？</p>
+
+      <div class="n-tabs" id="nTabs">
+        <button class="tab active" data-n="2" style="--c:#4dabf7">2 台</button>
+        <button class="tab" data-n="3" style="--c:#ff922b">3 台</button>
+        <button class="tab" data-n="4" style="--c:#9b7ede">4 台</button>
+        <button class="tab" data-n="5" style="--c:#51cf66">5 台</button>
+        <button class="tab" data-n="6" style="--c:#ff8fab">6 台</button>
+      </div>
+
+      <div class="n-action">
+        <button class="tool" id="nStartBtn">🔗 开始连接网线</button>
+      </div>
+
+      <canvas id="nCanvas"></canvas>
+
+      <div class="n-info" id="nInfo"></div>
+
+      <div class="desc">
+        <b>💡 规律：</b>n 台机器两两互连，网线数量 = n × (n − 1) ÷ 2。<br>
+        机器少的时候还凑合，一旦超过 5 台，线就多得吓人——所以真实网络里我们用<b>交换机</b>来解决问题（下面几块内容就会讲到）。
+      </div>
+    </section>
+
+    <!-- 板块 3：交换机 vs 集线器 -->
+    <section class="card">
+      <h2>中心设备 <span class="hl">交换机</span> 的作用</h2>
+      <p class="sub-title">同样一台中心设备，为什么交换机会比集线器快得多？</p>
+
+      <div class="tabs" id="modeTabs">
+        <button class="tab" data-mode="hub"    style="--c:#ff6b6b">📢 集线器：广播式</button>
+        <button class="tab" data-mode="switch" style="--c:#00c2a8">🎯 交换机：定向转发</button>
+      </div>
+
+      <canvas id="switchCanvas"></canvas>
+      <div class="desc" id="switchDesc"></div>
+    </section>
+
+    <!-- 板块 4：MAC 地址表 -->
+    <section class="card">
+      <h2>📋 交换机怎么知道数据发给谁？<span class="hl">MAC 地址表</span></h2>
+      <p class="sub-title">每块网卡都有一个全球唯一的 MAC 地址，交换机靠它记住「哪台电脑接在哪个端口」</p>
+
+      <canvas id="macCanvas"></canvas>
+
+      <div class="mac-btn-row">
+        <button class="tool" id="macAtoC">▶ 让 A 给 C 发消息</button>
+        <button class="tool" id="macBtoD">▶ 让 B 给 D 发消息</button>
+        <button class="tool reset" id="macClear">↺ 清空</button>
+      </div>
+
+      <table class="mac-table" id="macTable">
+        <thead>
+          <tr><th>计算机</th><th>MAC 地址</th><th>交换机端口</th></tr>
+        </thead>
+        <tbody>
+          <tr id="macRow-A"><td>A</td><td>aa-aa-aa-aa-aa-aa</td><td>1</td></tr>
+          <tr id="macRow-B"><td>B</td><td>bb-bb-bb-bb-bb-bb</td><td>2</td></tr>
+          <tr id="macRow-C"><td>C</td><td>cc-cc-cc-cc-cc-cc</td><td>3</td></tr>
+          <tr id="macRow-D"><td>D</td><td>dd-dd-dd-dd-dd-dd</td><td>4</td></tr>
+        </tbody>
+      </table>
+
+      <div class="desc" id="macDesc">
+        <b>💡 交换机的工作过程：</b>当 A 给 C 发消息时，交换机会查看数据里的<b>目标 MAC 地址</b>「cc-cc-cc-cc-cc-cc」，
+        然后查自己的 MAC 地址表，发现这个地址对应的是<b>端口 3</b>，于是只从端口 3 把数据发出去——
+        这就是「定向转发」，其他电脑完全收不到。<br>
+        <span class="ok">🔍 试一试：</span>点上面的按钮，看看数据包里写的 MAC 地址，和表格里对上的那一行会亮起来。
+      </div>
+    </section>
+
+  </div>
 
   <!-- ============================================================
-       板块 3：交换机 vs 集线器
+       实操面板：板块 5
        ============================================================ -->
-  <section class="card">
-    <h2>中心设备 <span class="hl">交换机</span> 的作用</h2>
-    <p class="sub-title">同样一台中心设备，为什么交换机会比集线器快得多？</p>
+  <div id="panel-practice" style="display:none;">
 
-    <div class="tabs" id="modeTabs">
-      <button class="tab" data-mode="hub"    style="--c:#ff6b6b">📢 集线器：广播式</button>
-      <button class="tab" data-mode="switch" style="--c:#00c2a8">🎯 交换机：定向转发</button>
-    </div>
+    <section class="card">
+      <h2>🧪 动手实验：<span class="hl">组建小型局域网</span></h2>
+      <p class="sub-title">拖动设备摆好位置，用「连接网线」自由连线，再切到「发送数据」看看数据怎么走</p>
 
-    <canvas id="switchCanvas"></canvas>
-    <div class="desc" id="switchDesc"></div>
-  </section>
+      <div class="lan-toolbar">
+        <button class="tool active" data-mode="move">🖐 拖动设备</button>
+        <button class="tool" data-mode="link">🔗 连接网线</button>
+        <button class="tool" data-mode="erase">✂️ 删除网线</button>
+        <button class="tool" data-mode="send">📨 发送数据</button>
+        <button class="tool reset" id="lanReset">↺ 重置实验</button>
+      </div>
 
-  <!-- ============================================================
-       板块 4：MAC 地址表
-       ============================================================ -->
-  <section class="card">
-    <h2>📋 交换机怎么知道数据发给谁？<span class="hl">MAC 地址表</span></h2>
-    <p class="sub-title">每块网卡都有一个全球唯一的 MAC 地址，交换机靠它记住「哪台电脑接在哪个端口」</p>
+      <canvas id="lanCanvas"></canvas>
 
-    <canvas id="macCanvas"></canvas>
+      <div class="hint" id="lanHint"></div>
 
-    <div class="mac-btn-row">
-      <button class="tool" id="macAtoC">▶ 让 A 给 C 发消息</button>
-      <button class="tool" id="macBtoD">▶ 让 B 给 D 发消息</button>
-      <button class="tool reset" id="macClear">↺ 清空</button>
-    </div>
+      <div class="lan-status">
+        <div class="stat-item"><span class="stat-dot" id="dotPC"></span>已连网电脑 <b id="connPC">0</b>/4</div>
+        <div class="stat-item"><span class="stat-dot" id="dotSW"></span>交换机端口 <b id="usedPort">0</b>/5</div>
+        <div class="stat-msg" id="statMsg"></div>
+      </div>
 
-    <table class="mac-table" id="macTable">
-      <thead>
-        <tr><th>计算机</th><th>MAC 地址</th><th>交换机端口</th></tr>
-      </thead>
-      <tbody>
-        <tr id="macRow-A"><td>A</td><td>aa-aa-aa-aa-aa-aa</td><td>1</td></tr>
-        <tr id="macRow-B"><td>B</td><td>bb-bb-bb-bb-bb-bb</td><td>2</td></tr>
-        <tr id="macRow-C"><td>C</td><td>cc-cc-cc-cc-cc-cc</td><td>3</td></tr>
-        <tr id="macRow-D"><td>D</td><td>dd-dd-dd-dd-dd-dd</td><td>4</td></tr>
-      </tbody>
-    </table>
+      <div class="desc" id="lanDesc">
+        <b>🎯 实验目标：</b>用网线把 4 台电脑全部接入交换机，组建一个小型局域网。也可以试试电脑之间直接连线，看看数据会不会走别的路。<br>
+        <span class="ok">💡 观察指示灯：</span>电脑网卡旁的小灯、交换机端口下方的小灯，<b>连上网线就会变绿</b>；网线拔掉，灯就熄灭——这是网络管理员排查故障的第一招。
+      </div>
+    </section>
 
-    <div class="desc" id="macDesc">
-      <b>💡 交换机的工作过程：</b>当 A 给 C 发消息时，交换机会查看数据里的<b>目标 MAC 地址</b>「cc-cc-cc-cc-cc-cc」，
-      然后查自己的 MAC 地址表，发现这个地址对应的是<b>端口 3</b>，于是只从端口 3 把数据发出去——
-      这就是「定向转发」，其他电脑完全收不到。<br>
-      <span class="ok">🔍 试一试：</span>点上面的按钮，看看数据包里写的 MAC 地址，和表格里对上的那一行会亮起来。
-    </div>
-  </section>
-
-  <!-- ============================================================
-       板块 5：动手实验
-       ============================================================ -->
-  <section class="card">
-    <h2>🧪 动手实验：<span class="hl">组建小型局域网</span></h2>
-    <p class="sub-title">拖动设备摆好位置，用「连接网线」自由连线，再切到「发送数据」看看数据怎么走</p>
-
-    <div class="lan-toolbar">
-      <button class="tool active" data-mode="move">🖐 拖动设备</button>
-      <button class="tool" data-mode="link">🔗 连接网线</button>
-      <button class="tool" data-mode="erase">✂️ 删除网线</button>
-      <button class="tool" data-mode="send">📨 发送数据</button>
-      <button class="tool reset" id="lanReset">↺ 重置实验</button>
-    </div>
-
-    <canvas id="lanCanvas"></canvas>
-
-    <div class="hint" id="lanHint"></div>
-
-    <div class="lan-status">
-      <div class="stat-item"><span class="stat-dot" id="dotPC"></span>已连网电脑 <b id="connPC">0</b>/4</div>
-      <div class="stat-item"><span class="stat-dot" id="dotSW"></span>交换机端口 <b id="usedPort">0</b>/5</div>
-      <div class="stat-msg" id="statMsg"></div>
-    </div>
-
-    <div class="desc" id="lanDesc">
-      <b>🎯 实验目标：</b>用网线把 4 台电脑全部接入交换机，组建一个小型局域网。也可以试试电脑之间直接连线，看看数据会不会走别的路。<br>
-      <span class="ok">💡 观察指示灯：</span>电脑网卡旁的小灯、交换机端口下方的小灯，<b>连上网线就会变绿</b>；网线拔掉，灯就熄灭——这是网络管理员排查故障的第一招。
-    </div>
-  </section>
+  </div>
 
 </div>
 
@@ -574,15 +636,30 @@ function drawPacket(ctx, x, y, color, phase){
 let clock = 0;
 
 /* ============================================================
-   板块 2：n 台机器互连
+   顶部主标签切换
+   ============================================================ */
+document.querySelectorAll('.main-tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.main-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    const panel = btn.dataset.panel;
+    document.getElementById('panel-knowledge').style.display = panel === 'knowledge' ? '' : 'none';
+    document.getElementById('panel-practice').style.display  = panel === 'practice'  ? '' : 'none';
+  });
+});
+
+/* ============================================================
+   板块 2：n 台机器互连（改为点击按钮后才连线，默认 2 台）
    ============================================================ */
 const NW = 900, NH = 420;
 const nCanvas = document.getElementById('nCanvas');
 const nCtx = setupCanvas(nCanvas, NW, NH);
 const nDots = makeDotPattern(NW, NH, 28, '#eceadf');
 
-let nSel = 4;
-let nProg = 0;
+let nSel = 2;          // 默认 2 台
+let nProg = 0;         // 已画出的连线数量
+let nPlaying = false;  // 是否正在自动连线
+let lastNInfoKey = '';
 
 function nLinkCount(n){ return n * (n - 1) / 2; }
 
@@ -596,22 +673,86 @@ function nPosis(n){
   return arr;
 }
 
+function updateNButton(){
+  const btn = document.getElementById('nStartBtn');
+  if (!btn) return;
+  const total = nLinkCount(nSel);
+  if (nProg >= total){
+    btn.textContent = '↺ 重新演示';
+    btn.classList.remove('active');
+  } else if (nPlaying){
+    btn.textContent = '⏳ 正在连线…';
+    btn.classList.add('active');
+  } else {
+    btn.textContent = '🔗 开始连接网线';
+    btn.classList.remove('active');
+  }
+}
+
+function updateNInfo(){
+  const total = nLinkCount(nSel);
+  const el = document.getElementById('nInfo');
+  if (!el) return;
+  const shown = Math.min(Math.floor(nProg), total);
+  const done = nProg >= total;
+  const key = nSel + '|' + shown + '|' + (done ? 'd' : (nPlaying ? 'p' : 'w'));
+  if (key === lastNInfoKey) return;
+  lastNInfoKey = key;
+
+  if (done){
+    el.innerHTML = nSel + ' 台机器两两互连 → ' + nSel + '×' + (nSel-1) + '÷2 = <b>' + total + '</b> 根网线';
+  } else if (nPlaying && shown > 0){
+    el.innerHTML = nSel + ' 台机器两两互连 → 已连 <b>' + shown + '</b> 根 … 猜猜看还差几根？';
+  } else if (nPlaying){
+    el.innerHTML = nSel + ' 台机器两两互连 → 正在连线，请观察一共画了多少根…';
+  } else {
+    el.innerHTML = nSel + ' 台机器两两互连 → 先猜一猜：一共需要几根网线？';
+  }
+}
+
 function setN(n){
   nSel = n;
   nProg = 0;
-  const total = nLinkCount(n);
-  document.getElementById('nInfo').innerHTML =
-    n + ' 台机器两两互连 → ' + n + '×' + (n-1) + '÷2 = <b>' + total + '</b> 根网线';
+  nPlaying = false;
+  lastNInfoKey = '';
   document.querySelectorAll('#nTabs .tab').forEach(function(b){
     b.classList.toggle('active', parseInt(b.dataset.n, 10) === n);
   });
+  updateNButton();
+  updateNInfo();
 }
 
 function updateN(dt){
-  const total = nLinkCount(nSel);
-  if (nProg < total) nProg += dt * 3.2;
-  if (nProg > total) nProg = total;
+  if (nPlaying){
+    const total = nLinkCount(nSel);
+    if (nProg < total){
+      nProg += dt * 3.2;
+      if (nProg >= total){
+        nProg = total;
+        nPlaying = false;
+        updateNButton();
+      }
+    } else {
+      nPlaying = false;
+      updateNButton();
+    }
+  }
+  updateNInfo();
 }
+
+document.getElementById('nStartBtn').addEventListener('click', function(){
+  const total = nLinkCount(nSel);
+  if (nProg >= total){
+    // 已画完 → 重新开始
+    nProg = 0;
+    nPlaying = true;
+  } else if (!nPlaying){
+    nPlaying = true;
+  }
+  lastNInfoKey = '';
+  updateNButton();
+  updateNInfo();
+});
 
 function drawN(){
   const ctx = nCtx;
@@ -673,7 +814,6 @@ const TOPOS = {
     edges: [[0,1],[1,2],[2,3],[3,4],[4,5]]
   },
 
-  /* 星状：中心也是一台电脑（不使用交换机） */
   star: {
     color: '#4dabf7',
     desc: `<b>⭐ 星状拓扑</b>：一台<b>中心电脑</b>连接其他所有电脑，其余电脑之间通信都要经过中心电脑转发。<br>
@@ -724,7 +864,6 @@ const TOPOS = {
     edges: [[0,1],[0,2],[0,3],[0,4],[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
   },
 
-  /* 树状：完整二叉树，全部由电脑组成（不使用交换机） */
   tree: {
     color: '#ff8fab',
     desc: `<b>🌳 树状拓扑</b>：电脑像树枝一样<b>分层连接</b>，最上面的电脑连接两台下级电脑，下级再各自连接更下级的电脑。<br>
@@ -968,7 +1107,6 @@ function drawTopo(){
     else if (i === state.dst) highlight = '#ffb703';
 
     if (nd.type === 'switch'){
-      /* 拓扑图里若出现交换机（仅内部保留，目前所有拓扑均用电脑） */
       ctx.save();
       ctx.translate(nd.x, nd.y);
       roundRect(ctx, -52, -34, 104, 68, 15);
@@ -1231,7 +1369,7 @@ const MAC_TIMING = {
   hold:     2.4
 };
 
-let macDemo = null;   // {src, dst, phase, t}
+let macDemo = null;
 
 function macPC(id){
   for (const p of MAC_PCS) if (p.id === id) return p;
@@ -1290,7 +1428,6 @@ function drawMac(){
   const srcPC = macDemo ? macPC(macDemo.src) : null;
   const dstPC = macDemo ? macPC(macDemo.dst) : null;
 
-  /* 连线 */
   ctx.lineCap = 'round';
   MAC_PCS.forEach(function(p){
     const related = macDemo && (p.id === macDemo.src || p.id === macDemo.dst);
@@ -1304,7 +1441,6 @@ function drawMac(){
     ctx.shadowBlur = 0;
   });
 
-  /* 交换机 */
   const swActive = macDemo && macDemo.phase === 'lookup';
   ctx.save();
   ctx.translate(MAC_SW.x, MAC_SW.y);
@@ -1324,7 +1460,6 @@ function drawMac(){
   ctx.fillStyle = '#00c2a8';
   ctx.fillText('交换机', 0, -8);
 
-  /* 4 个端口圆点 */
   const portLabels = ['1','2','3','4'];
   const ports = MAC_PCS.map(function(p){ return {x: p.px - MAC_SW.x, y: p.py - MAC_SW.y, port: p.port, id: p.id}; });
   ports.forEach(function(pt){
@@ -1350,7 +1485,6 @@ function drawMac(){
 
   ctx.restore();
 
-  /* 四台电脑 */
   MAC_PCS.forEach(function(p){
     let hl = null;
     if (macDemo){
@@ -1360,7 +1494,6 @@ function drawMac(){
     drawPC(ctx, p.x, p.y, p.label, PALETTE[MAC_PCS.indexOf(p) % PALETTE.length], hl);
   });
 
-  /* 数据包 */
   let pktPos = null;
   if (macDemo){
     if (macDemo.phase === 'toSwitch' && srcPC){
@@ -1385,7 +1518,6 @@ function drawMac(){
   if (pktPos){
     drawPacket(ctx, pktPos.x, pktPos.y, '#ffd43b', clock);
 
-    /* 查表时在交换机上画个脉冲圈 */
     if (macDemo && macDemo.phase === 'lookup'){
       const t = macDemo.t / MAC_TIMING.lookup;
       ctx.save();
@@ -1400,7 +1532,6 @@ function drawMac(){
     }
   }
 
-  /* 顶部提示 */
   ctx.save();
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -1475,7 +1606,6 @@ function countLinks(id){
   return n;
 }
 
-/* 唯一限制：交换机只有 5 个端口。电脑不限网卡数量 */
 function canLink(a, b){
   if (a === b) return false;
   if (lanLinks.some(l => (l.a===a&&l.b===b) || (l.a===b&&l.b===a))) return false;
@@ -1837,7 +1967,6 @@ function drawLan(){
   ctx.clearRect(0, 0, LW, LH);
   ctx.drawImage(lanDots, 0, 0, LW, LH);
 
-  /* 网线 */
   ctx.lineCap = 'round';
   for (const l of lanLinks){
     const a = getDevice(l.a), b = getDevice(l.b);
@@ -1858,7 +1987,6 @@ function drawLan(){
     ctx.stroke();
   }
 
-  /* 正在拖拽的网线 */
   if (lanLinkDrag){
     const a = getDevice(lanLinkDrag.fromId);
     if (a){
@@ -1875,7 +2003,6 @@ function drawLan(){
     }
   }
 
-  /* 数据包已走过的路径高亮 */
   if (lanPacket){
     const frac = Math.min(1, lanPacket.t / lanPacket.dur);
     let acc = 0;
@@ -1904,7 +2031,6 @@ function drawLan(){
     ctx.restore();
   }
 
-  /* 设备 */
   const portsUsed = lanLinks.filter(l => l.a === 'sw' || l.b === 'sw').length;
 
   for (const d of lanDevices){
@@ -1914,7 +2040,6 @@ function drawLan(){
   const sw = getDevice('sw');
   if (sw) drawLanSwitch(ctx, sw, portsUsed);
 
-  /* 待发送的电脑脉冲圈 */
   if (lanMode === 'send' && lanPendingSrc){
     const d = getDevice(lanPendingSrc);
     if (d){
@@ -1929,7 +2054,6 @@ function drawLan(){
     }
   }
 
-  /* 数据包 */
   if (lanPacket){
     const frac = Math.min(1, lanPacket.t / lanPacket.dur);
     const pos = pointAt(lanPacket.pts, frac);
@@ -2046,7 +2170,7 @@ function frame(now){
 /* ============================================================
    初始化
    ============================================================ */
-setN(4);
+setN(2);   // 默认 2 台
 
 document.querySelector('#topoTabs .tab[data-topo="linear"]').classList.add('active');
 loadTopo('linear');
